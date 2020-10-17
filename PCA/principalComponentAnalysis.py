@@ -74,3 +74,27 @@ print("Primer componente principal: ")
 print(pca.components_[0])
 print("Vemos que las cargas corresponden al siguiente autovector de la matriz de correlacion: ")
 print(corrEigenVectors.T[0])
+
+# Normalizamos nuevamente manualmente, sin eliminar la columna 'Country', ya que la queremos para armar un mapa de paises con su indice
+# segun la primer componente principal
+countries = {}
+dataFrame = pd.read_csv('europe.csv')
+dataFrame['Area'] = (dataFrame['Area'] - dataFrame['Area'].mean()) / (dataFrame['Area'].std())
+dataFrame['GDP'] = (dataFrame['GDP'] - dataFrame['GDP'].mean()) / (dataFrame['GDP'].std())
+dataFrame['Inflation'] = (dataFrame['Inflation'] - dataFrame['Inflation'].mean()) / (dataFrame['Inflation'].std())
+dataFrame['Life.expect'] = (dataFrame['Life.expect'] - dataFrame['Life.expect'].mean()) / (dataFrame['Life.expect'].std())
+dataFrame['Military'] = (dataFrame['Military'] - dataFrame['Military'].mean()) / (dataFrame['Military'].std())
+dataFrame['Pop.growth'] = (dataFrame['Pop.growth'] - dataFrame['Pop.growth'].mean()) / (dataFrame['Pop.growth'].std())
+dataFrame['Unemployment'] = (dataFrame['Unemployment'] - dataFrame['Unemployment'].mean()) / (dataFrame['Unemployment'].std())
+
+for i in range(0, len(dataFrame)):
+	countries[dataFrame['Country'][i]] = dataFrame['Area'][i] * pca.components_[0][0] + dataFrame['GDP'][i] * pca.components_[0][1] 
+	+ dataFrame['Inflation'][i] * pca.components_[0][2] + dataFrame['Life.expect'][i] * pca.components_[0][3]
+	+ dataFrame['Military'][i] * pca.components_[0][4] + dataFrame['Pop.growth'][i] * pca.components_[0][5] 
+	+ dataFrame['Unemployment'][i] * pca.components_[0][6]
+
+# Imprimimos los paises, en orden descendiente, en funcion de el indice obtenido a partir de la primer componente principal
+print("\nPais    Indice")
+sortedCountries = sorted(countries, key=countries.__getitem__, reverse=True)
+for country in sortedCountries:
+	print(country + ", " + str(countries[country]))
