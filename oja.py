@@ -128,6 +128,7 @@ def evaluateNetwork(data, weights, rows, cols):
 
 
 
+
 eta = 1
 epsilon = 0.00001
 maxIterations = 100000
