@@ -7,8 +7,12 @@ import matplotlib.pyplot as plt
 import random
 import site
 
-def ruleOja(learnRate, x, y, weight):
-    return (learnRate * (y * x - pow(y, 2) * np.asarray(weight)))
+def ruleOja(learnRate, inputVector, output, weights):
+    deltaWeights = np.zeros(len(weights))
+    for i in range(0, len(inputVector)):
+        deltaWeights[i] = learnRate * (output * inputVector[i] - pow(output, 2) * weights[i])
+
+    return deltaWeights
 
 
 def standardizeData():
@@ -52,51 +56,33 @@ def getVariableSquaredVariance(variableData, variableMean):
     return float(sum)/(len(variableData) - 1)
 
 
-def simplePerceptron(amountOfVariables, data, eta, maxIterations):
-    i = 0
-    weights = []
-    deltaWeights = []
-    # error = 1.0
-    for k in range(amountOfVariables):
-        n = random.random()
-        weights.append(n)
+def simplePerceptron(amountOfVariables, data, initialEta, maxEpochs):
+    weights = np.zeros(amountOfVariables)
+    for k in range(0, len(weights) - 1):
+        weights[k] = random.random()
 
-    for k in range(amountOfVariables):
-        n = random.random()
-        deltaWeights.append(n)
+    epochs = 0
+    eta = initialEta
+    while (epochs < maxEpochs):
+        print("Current epoch: " + str(epochs))
+        print("eta: " + str(eta))
+        for i in range(0, len(data)):
+            randomInput = getRandomInput(data, amountOfVariables)
+            output = getOutput(randomInput, weights)
+            deltaWeights = ruleOja(eta, randomInput, output, weights)
+            updateWeights(weights, deltaWeights)
 
-    while (deltaWeights[0] > 0 and i < maxIterations):
-        randomIndex = random.randint(0, len(data) - 1)
-        randomInput = getInput(data, amountOfVariables, randomIndex)
-        output = getOutput(randomInput, weights)
-        deltaWeights = ruleOja(eta, randomInput, output, weights)
-        weights = updateWeights(weights, deltaWeights, eta)
-        # error = calculateError(data, expectedOutputs, weights)
-        i += 1
-
+        epochs += 1
+        eta = eta / (epochs + 1)
+        
     return weights
 
-def updateWeights(weights, deltaWeights, eta):
-    newWeights = np.zeros(len(weights))
-    for i in range(0, len(deltaWeights)):
-        newWeights[i] += weights[i] + deltaWeights[i]
+def updateWeights(weights, deltaWeights):
+    for i in range(0, len(weights)):
+        weights[i] += deltaWeights[i]
 
-    # The last weight is the bias, so we just sum the eta (equivalent to multiply it by 1)
-    newWeights[len(weights) - 1] += eta
-
-    return newWeights
-
-def calculatePerceptronExcitement(input, weights):
-    # The last weight is the bias
-    result = weights[len(weights) - 1]
-
-    for i in range(0, len(input)):
-        result += input[i] * weights[i]
-
-    return result
-
-def getInput(data, amountOfVariables, index):
-    # data[randomIndex]
+def getRandomInput(data, amountOfVariables):
+    index = random.randint(0, len(data) - 1)
     inputArray = np.zeros(amountOfVariables)
     for i in range(0, amountOfVariables):
         inputArray[i] = data[index][i]
@@ -104,25 +90,31 @@ def getInput(data, amountOfVariables, index):
 
 def getOutput(arrayInput, weights):
     output = 0.0
-
     for i in range(0, len(arrayInput)):
         output += (arrayInput[i] * weights[i])
 
-    # tengo que agregar este término independiente que no está multiplicado por la variable?
-    # output[len(weights) - 1] += weights[len(weights) - 1]
-
     return output
 
-
-
-eta = 0.00001
-epsilon = 0.00001
-maxIterations = 10000
+eta = 0.15
+epochs = 500
 amountOfVariables = 7
 standardizedData = standardizeData()
-weights = simplePerceptron(amountOfVariables, standardizedData, eta, maxIterations)
-# weights = simpleLinearPerceptron(amountOfVariables, standardizedData, eta, epsilon, maxIterations)
-# evaluateNetwork(standardizedData, weights, amountOfVariables)
-# plotUMatrix(weights, amountOfVariables)
+weights = simplePerceptron(amountOfVariables, standardizedData, eta, epochs)
 print("Las cargas dan...")
 print(weights)
+
+# Las cargas originales obtenidas usando una libreria son:
+#[ 0.1248739  -0.50050586  0.40651815 -0.48287333  0.18811162 -0.47570355
+#  0.27165582]
+
+#Usando etaInicial=0.1 y epochs=20 con la regla de Oja se obtuvo:
+#[ 0.19408458 -0.54898837  0.40332293 -0.4517502   0.19758084 -0.4797626
+#  0.25261652]
+
+#Usando etaInicial=0.1 y epochs=100 con la regla de Oja se obtuvo:
+#[ 0.14337052 -0.48813356  0.46874206 -0.49543837  0.14530174 -0.45747126
+#  0.25487497]
+
+#Usando etaInicial=0.15 y epochs=500 con la regla de Oja se obtuvo:
+#[ 0.19045154 -0.47182641  0.46641092 -0.50660133  0.1669918  -0.46618425
+#  0.24594691]
