@@ -64,8 +64,6 @@ def simplePerceptron(amountOfVariables, data, initialEta, maxEpochs):
     epochs = 0
     eta = initialEta
     while (epochs < maxEpochs):
-        print("Current epoch: " + str(epochs))
-        print("eta: " + str(eta))
         for i in range(0, len(data)):
             randomInput = getRandomInput(data, amountOfVariables)
             output = getOutput(randomInput, weights)
