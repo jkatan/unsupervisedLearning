@@ -2,6 +2,8 @@ import numpy as np
 import random
 import sys
 
+MAX_ITERATIONS = 1000
+
 class hopfieldNetwork:
 	def __init__(self, patterns):
 		self.weights = self.calculateWeights(patterns)
@@ -29,6 +31,9 @@ class hopfieldNetwork:
 			drawImage(np.squeeze(np.asarray(newState)), "Current step: " + str(step))
 			if np.array_equal(newState, currentState) == True:
 				print("Stabilized")
+				return newState
+			if step >= MAX_ITERATIONS:
+				print("Max iterations exceeded, returning last processed state...")
 				return newState
 			currentState = newState
 			step += 1
