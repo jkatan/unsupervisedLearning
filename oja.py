@@ -69,7 +69,7 @@ def simpleLinearPerceptron(amountOfVariables, data, eta, epsilon, maxIterations)
     # lastDeltaWeight4 = 0.0f
 
     while (error > epsilon and i < maxIterations):
-        randomIndex = random.randint(0, len(data))
+        randomIndex = random.randint(0, len(data) - 1)
         randomInput = data[randomIndex]
         output = getOutput(randomInput, weights)
         # localError = expectedOutputs[randomIndex] - output
@@ -107,33 +107,88 @@ def getOutput(arrayInput, weights):
     return output
 
 
-def evaluateNetwork(data, weights, rows, cols):
-    grid = np.zeros([rows, cols])
-    clusters = initializeEmptyClusters(rows, cols)
+def evaluateNetwork(data, weights, amountOfVariables):
+    grid = np.zeros([amountOfVariables])
+    clusters = initializeEmptyClusters(amountOfVariables)
     for i in range(0, len(data)):
-        winningNeuron = getWinner(weights, getArrayOfData(data[i]), cols, rows)
-        grid[winningNeuron[0]][winningNeuron[1]] += 1
-        clusters[(winningNeuron[0], winningNeuron[1])].append(data[i]['Country'])
+        winningNeuron = getWinner(weights, getArrayOfData(data[i]), amountOfVariables)
+        grid[winningNeuron[0]] += 1
+        # clusters[(winningNeuron[0])].append(data[i]['Country'])
 
-    printClusters(clusters)
-    fig, ax = plt.subplots()
-    ax.imshow(grid)
+    # printClusters(clusters)
+    # fig, ax = plt.subplots()
+    # ax.imshow(grid)
 
-    for i in range(0, rows):
-        for j in range(0, cols):
-            ax.text(j, i, grid[i, j], ha="center", va="center", color="w")
+    # for i in range(0, amountOfVariables):
+    #     ax.text(i, grid[i], ha="center", va="center", color="w")
 
-    fig.tight_layout()
+    # fig.tight_layout()
     plt.show()
 
+def initializeEmptyClusters(amountOfVariables):
+    emptyMap = {}
+    for i in range(0, amountOfVariables):
+        emptyMap[(i)] = []
+    return emptyMap
+
+def getWinner(weights, entry, amountOfVariables):
+    minimun = None
+    for i in range(0, amountOfVariables):
+        distance = getDistance(entry, weights[i])
+        if minimun == None or minimun[1] > distance:
+            minimun = [i, distance]
+    return [minimun[0], minimun[1]]
+
+def getArrayOfData(entry):
+    return np.array([entry['Area'], entry['GDP'], entry['Inflation'], entry['Life.expect'], entry['Military'], entry['Pop.growth'], entry['Unemployment']])
+
+def getDistance(entry, weight):
+    aux = entry - weight
+    return np.sqrt(sum(aux * aux.T))
+
+def printClusters(clusters):
+    print("Clusters: ")
+    for item in clusters.items():
+        print(item)
+
+def plotUMatrix(weights, amountOfVariables):
+    averageDistances = np.zeros([amountOfVariables])
+    # for i in range(0, amountOfVariables):
+    #     averageDistances[i] = getNeuronNeighborsAverageDistance(weights, i, amountOfVariables)
+
+    # fig, ax = plt.subplots()
+    # im = ax.imshow(averageDistances)
+    # cbar = ax.figure.colorbar(im, ax=ax)
+    # cbar.ax.set_ylabel("Avg distance", rotation=-90, va="bottom")
+
+    # fig.tight_layout()
+    # plt.show()
+
+# For each neuron, we calculate the average weights distance with the 4 closest neighbors neurons
+def getNeuronNeighborsAverageDistance(networkWeights, neuronRow, neuronCol, amountOfVariables):
+    neuronNeighborsAmount = 0
+    weightsDistancesSum = 0
+    if neuronCol - 1 >= 0:  #left neighbor
+        neuronNeighborsAmount += 1
+        weightsDistancesSum += getDistance(networkWeights[neuronRow][neuronCol], networkWeights[neuronRow][neuronCol-1])
+    if neuronCol + 1 < amountOfVariables: #right neighbor
+        neuronNeighborsAmount += 1
+        weightsDistancesSum += getDistance(networkWeights[neuronRow][neuronCol], networkWeights[neuronRow][neuronCol+1])
+    if neuronRow - 1 >= 0: #top neighbor
+        neuronNeighborsAmount += 1
+        weightsDistancesSum += getDistance(networkWeights[neuronRow][neuronCol], networkWeights[neuronRow-1][neuronCol])
+    if neuronRow + 1 < amountOfVariables: #bottom neighbor
+        neuronNeighborsAmount += 1
+        weightsDistancesSum += getDistance(networkWeights[neuronRow][neuronCol], networkWeights[neuronRow+1][neuronCol])
+
+    return weightsDistancesSum / neuronNeighborsAmount
 
 
-
-eta = 1
+eta = 0.00001
 epsilon = 0.00001
 maxIterations = 100000
 amountOfVariables = 7
 standardizedData = standardizeData()
 weights = simpleLinearPerceptron(amountOfVariables, standardizedData, eta, epsilon, maxIterations)
-evaluateNetwork(standardizedData, weights, rows, cols)
-plotUMatrix(weights, rows, cols)
+evaluateNetwork(standardizedData, weights, amountOfVariables)
+plotUMatrix(weights, amountOfVariables)
