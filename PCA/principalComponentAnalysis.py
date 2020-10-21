@@ -94,7 +94,9 @@ for i in range(0, len(dataFrame)):
 	+ dataFrame['Unemployment'][i] * pca.components_[0][6]
 
 # Imprimimos los paises, en orden descendiente, en funcion de el indice obtenido a partir de la primer componente principal
-print("\nPais    Indice")
+print("\n   Pais    Indice")
 sortedCountries = sorted(countries, key=countries.__getitem__, reverse=True)
+tablePosition = 1
 for country in sortedCountries:
-	print(country + ", " + str(countries[country]))
+	print(str(tablePosition) + ". " + country + ", " + str(countries[country]))
+	tablePosition += 1

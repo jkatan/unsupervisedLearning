@@ -93,7 +93,7 @@ def getOutput(arrayInput, weights):
 
     return output
 
-eta = 0.15
+eta = 0.13
 epochs = 500
 amountOfVariables = 7
 standardizedData = standardizeData()

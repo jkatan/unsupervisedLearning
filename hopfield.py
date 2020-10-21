@@ -158,4 +158,9 @@ def startDemo():
 	network = hopfieldNetwork(letters)
 	predictNoisyLetter(network, letterToPredict, noiseToAdd)
 
-startDemo()
+if (len(sys.argv) != 3):
+	print("Invalid arguments")
+	print("The program receives a valid letter (S, B, L, or A) and the ammount of noise to add to that letter, and then predicts that pattern with noise.")
+	print("Example of usage: 'python hopfield.py S 10' will add random noise to 10 cells of the 'S' pattern, and then will try to predict that random pattern")
+else:
+	startDemo()
